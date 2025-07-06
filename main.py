@@ -35,7 +35,17 @@ if __name__ == "__main__":
         print("Error: `DISCORD_GUILD` must be defined")
         exit(1)
 
+    STATUS_HOST = _get_env(str, "STATUS_HTTP_HOST")
+    if STATUS_HOST is None:
+        print("Error: `STATUS_HTTP_HOST` must be defined")
+        exit(1)
+
+    STATUS_PORT = _get_env(int, "STATUS_HTTP_PORT")
+    if STATUS_PORT is None:
+        print("Error: `STATUS_HTTP_PORT` must be defined")
+        exit(1)
+
     # Create and run the client
-    client = bot.init_client(GUILD_ID)
+    client = bot.init_client(GUILD_ID, STATUS_HOST, STATUS_PORT)
 
     client.run(BOT_TOKEN)
