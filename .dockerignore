@@ -1,0 +1,7 @@
+# Ignore all files
+**/*
+
+# Except the main script, bot module, and requirements
+!main.py
+!bot
+!requirements.txt
