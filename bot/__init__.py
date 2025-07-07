@@ -61,11 +61,14 @@ def init_client(guild_id: int, status_host: str, status_port: int) -> discord.Cl
         guild=discord.Object(id=guild_id),
     )
     async def status(interaction: discord.Interaction):
-        r = requests.get(f"http://{status_host}:{status_port}/status.json")
+        response = requests.get(
+            f"http://{status_host}:{status_port}/status.json",
+        )
+        status = ServerStatus(response.json())
 
-        status = ServerStatus(r.json())
-        last_update = status.last_status_update.astimezone()
-        last_update_str = f"{last_update.month}/{last_update.day}/{last_update.year} {last_update.hour}:{last_update.minute}:{last_update.second}"
+        # Format last status update as Discord timestamps
+        last_update_str = f"<t:{round(status.last_status_update.timestamp())}>"
+        last_update_relative = f"<t:{round(status.last_status_update.timestamp())}:R>"
 
         print(status)
         if status.error is not None:
@@ -78,7 +81,7 @@ def init_client(guild_id: int, status_host: str, status_port: int) -> discord.Cl
 
         await interaction.response.send_message(
             f'# "{status.server_name}" Status:\n' +
-            f'_(Last update at {last_update_str})_\n' +
+            f'_(Last update: {last_update_str}, {last_update_relative})_\n' +
             f"- Player Count: {status.player_count}\n",
         )
 
