@@ -1,0 +1,32 @@
+services:
+  valheim:
+    image: ghcr.io/lloesche/valheim-server
+    cap_add:
+      - sys_nice
+    volumes:
+      - ./config:/config
+      - ./data:/opt/valheim
+    ports:
+      - "2456-2458:2456-2458/udp"
+      - "9001:9001/tcp"
+      - "9002:9002/tcp" # Port for the HTTP status server
+    environment:
+      # Required for the /status command to work
+      SERVER_PUBLIC: true
+      STATUS_HTTP: true
+      STATUS_HTTP_PORT: 9002 # You can change the port, but make sure to also change it in the "ports" section above, and in the bot's environment below
+
+      TZ: "America/Los_Angeles"
+
+    restart: unless-stopped
+    stop_grace_period: 2m
+
+  bot:
+    image: ghcr.io/eamonburns/valheim-helper-bot:main # NOTE: Don't use "main", you should pin to a specific version
+    environment:
+      # Set these in a .env file (see example.env)
+      DISCORD_TOKEN: "${DISCORD_TOKEN}"
+      DISCORD_GUILD: "${DISCORD_GUILD}"
+
+      STATUS_HTTP_HOST: valheim
+      STATUS_HTTP_PORT: 9002

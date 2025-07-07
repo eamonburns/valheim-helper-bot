@@ -1,0 +1,6 @@
+# Secrets
+.env
+
+# Valheim server data
+config/
+data/
