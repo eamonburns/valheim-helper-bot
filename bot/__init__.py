@@ -1,9 +1,12 @@
+import logging
 from datetime import datetime
 
 import requests
 
 import discord
 from discord import app_commands
+
+logger = logging.getLogger("valheim."+__name__)
 
 
 class ServerStatus:
@@ -61,6 +64,7 @@ def init_client(guild_id: int, status_host: str, status_port: int) -> discord.Cl
         guild=discord.Object(id=guild_id),
     )
     async def status(interaction: discord.Interaction):
+        logger.debug("/status command running")
         response = requests.get(
             f"http://{status_host}:{status_port}/status.json",
         )
@@ -70,12 +74,13 @@ def init_client(guild_id: int, status_host: str, status_port: int) -> discord.Cl
         last_update_str = f"<t:{round(status.last_status_update.timestamp())}>"
         last_update_relative = f"<t:{round(status.last_status_update.timestamp())}:R>"
 
-        print(status)
+        logger.info(status)
         if status.error is not None:
             # Convert to local time
             await interaction.response.send_message(
                 "Server status can't be retrieved. " +
                 f"Last update: {last_update_str}",
+                ephemeral=True,
             )
             return
 
@@ -83,11 +88,12 @@ def init_client(guild_id: int, status_host: str, status_port: int) -> discord.Cl
             f'# "{status.server_name}" Status:\n' +
             f'_(Last update: {last_update_str}, {last_update_relative})_\n' +
             f"- Player Count: {status.player_count}\n",
+            ephemeral=True,
         )
 
     @client.event
     async def on_ready():
         await tree.sync(guild=discord.Object(id=guild_id))
-        print(f"We have logged in as {client.user}")
+        logger.info(f"Logged in as {client.user}")
 
     return client
